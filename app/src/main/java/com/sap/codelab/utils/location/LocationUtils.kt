@@ -15,6 +15,24 @@ import kotlin.coroutines.resume
 
 internal object LocationUtils {
 
+    suspend fun searchLocation(context: Context, query: String): Pair<Double, Double>? =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val geocoder = Geocoder(context, Locale.getDefault())
+                val results: List<Address> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    suspendCancellableCoroutine { cont ->
+                        geocoder.getFromLocationName(query, 1) { addresses ->
+                            cont.resume(addresses)
+                        }
+                    }
+                } else {
+                    @Suppress("DEPRECATION")
+                    geocoder.getFromLocationName(query, 1) ?: emptyList()
+                }
+                results.firstOrNull()?.let { Pair(it.latitude, it.longitude) }
+            }.getOrNull()
+        }
+
     suspend fun getAddressFromCoordinates(context: Context, lat: Double, lng: Double): String? =
         withContext(Dispatchers.IO) {
             runCatching {

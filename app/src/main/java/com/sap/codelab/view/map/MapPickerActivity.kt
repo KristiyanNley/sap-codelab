@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -36,7 +38,8 @@ internal class MapPickerActivity : AppCompatActivity() {
 
         model = ViewModelProvider(this)[MapPickerViewModel::class.java]
         setupMap()
-        observeAddress()
+        setupSearch()
+        observeViewModel()
     }
 
     private fun setupMap() {
@@ -59,12 +62,40 @@ internal class MapPickerActivity : AppCompatActivity() {
         binding.mapView.overlays.add(0, tapOverlay)
     }
 
-    private fun observeAddress() {
+    private fun setupSearch() {
+        binding.searchInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val query = binding.searchInput.text?.toString().orEmpty()
+                model.searchLocation(query)
+                hideKeyboard()
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    private fun observeViewModel() {
         lifecycleScope.launch {
             model.address.collect { address ->
                 if (address != null) {
                     binding.addressCard.visibility = View.VISIBLE
                     binding.addressPreviewText.text = address
+                }
+            }
+        }
+        lifecycleScope.launch {
+            model.searchResult.collect { result ->
+                when (result) {
+                    is SearchResult.Found -> {
+                        val point = GeoPoint(result.lat, result.lng)
+                        placeMarker(point)
+                        binding.mapView.controller.setZoom(15.0)
+                        binding.mapView.controller.animateTo(point)
+                        showAddressLoading()
+                    }
+                    is SearchResult.NotFound ->
+                        Toast.makeText(this@MapPickerActivity, R.string.location_not_found, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -84,6 +115,11 @@ internal class MapPickerActivity : AppCompatActivity() {
         }
         binding.mapView.overlays.add(marker)
         binding.mapView.invalidate()
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.searchInput.windowToken, 0)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

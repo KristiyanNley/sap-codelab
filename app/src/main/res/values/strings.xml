@@ -16,4 +16,6 @@
     <string name="tap_map_to_select">Tap on the map to select a location</string>
     <string name="loading_address">Fetching address…</string>
     <string name="calculating_distance">Calculating distance…</string>
+    <string name="search_location_hint">Search city, street, place…</string>
+    <string name="location_not_found">Location not found. Try a different search.</string>
 </resources>
