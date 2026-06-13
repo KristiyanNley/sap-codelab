@@ -2,11 +2,15 @@ package com.sap.codelab.view.create
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.sap.codelab.location.GeofenceManager
 import com.sap.codelab.model.Memo
 import com.sap.codelab.repository.Repository
 import com.sap.codelab.utils.coroutines.ScopeProvider
 import com.sap.codelab.utils.extensions.empty
+import com.sap.codelab.utils.location.LocationUtils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 internal class CreateMemoViewModel(application: Application) : AndroidViewModel(application) {
@@ -16,9 +20,15 @@ internal class CreateMemoViewModel(application: Application) : AndroidViewModel(
     private var latitude: Double = 0.0
     private var longitude: Double = 0.0
 
+    private val _locationDisplay: MutableStateFlow<String?> = MutableStateFlow(null)
+    val locationDisplay: StateFlow<String?> = _locationDisplay
+
     fun setLocation(lat: Double, lng: Double) {
         latitude = lat
         longitude = lng
+        viewModelScope.launch {
+            _locationDisplay.value = LocationUtils.getAddressFromCoordinates(getApplication(), lat, lng)
+        }
     }
 
     fun hasLocation(): Boolean = latitude != 0.0 || longitude != 0.0

@@ -11,12 +11,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.sap.codelab.R
 import com.sap.codelab.databinding.ActivityCreateMemoBinding
 import com.sap.codelab.utils.extensions.empty
 import com.sap.codelab.view.map.EXTRA_LATITUDE
 import com.sap.codelab.view.map.EXTRA_LONGITUDE
 import com.sap.codelab.view.map.MapPickerActivity
+import kotlinx.coroutines.launch
 
 internal class CreateMemo : AppCompatActivity() {
 
@@ -29,9 +31,8 @@ internal class CreateMemo : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val lat = result.data?.getDoubleExtra(EXTRA_LATITUDE, 0.0) ?: 0.0
             val lng = result.data?.getDoubleExtra(EXTRA_LONGITUDE, 0.0) ?: 0.0
+            binding.contentCreateMemo.locationStatusText.text = getString(R.string.loading_address)
             model.setLocation(lat, lng)
-            binding.contentCreateMemo.locationStatusText.text =
-                getString(R.string.location_selected_format, lat, lng)
         }
     }
 
@@ -49,6 +50,14 @@ internal class CreateMemo : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         model = ViewModelProvider(this)[CreateMemoViewModel::class.java]
+
+        lifecycleScope.launch {
+            model.locationDisplay.collect { address ->
+                if (address != null) {
+                    binding.contentCreateMemo.locationStatusText.text = address
+                }
+            }
+        }
 
         binding.contentCreateMemo.pickLocationButton.setOnClickListener {
             requestLocationPermissionAndOpenMap()
