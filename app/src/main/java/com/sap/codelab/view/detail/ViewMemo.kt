@@ -1,8 +1,10 @@
 package com.sap.codelab.view.detail
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.sap.codelab.R
@@ -27,15 +29,9 @@ internal class ViewMemo : AppCompatActivity() {
         model = ViewModelProvider(this)[ViewMemoViewModel::class.java]
 
         if (savedInstanceState == null) {
-            lifecycleScope.launch {
-                model.memo.collect { memo -> memo?.let { bindMemo(it) } }
-            }
-            lifecycleScope.launch {
-                model.address.collect { address -> address?.let { showAddress(it) } }
-            }
-            lifecycleScope.launch {
-                model.distanceMeters.collect { distance -> distance?.let { showDistance(it) } }
-            }
+            lifecycleScope.launch { model.memo.collect { memo -> memo?.let { bindMemo(it) } } }
+            lifecycleScope.launch { model.address.collect { it?.let { addr -> showAddress(addr) } } }
+            lifecycleScope.launch { model.distanceMeters.collect { it?.let { d -> showDistance(d) } } }
             model.loadMemo(intent.getLongExtra(BUNDLE_MEMO_ID, -1))
         }
     }
@@ -46,16 +42,23 @@ internal class ViewMemo : AppCompatActivity() {
             memoDescription.setText(memo.description)
             memoTitle.isEnabled = false
             memoDescription.isEnabled = false
-            pickLocationButton.visibility = View.GONE
+
+            locationCard.isClickable = false
+            locationCard.isFocusable = false
+            pickLocationChevron.visibility = View.GONE
 
             val hasLocation = memo.reminderLatitude != 0.0 || memo.reminderLongitude != 0.0
             if (hasLocation) {
+                val primaryColor = ContextCompat.getColor(this@ViewMemo, R.color.colorPrimary)
+                val primaryList = ColorStateList.valueOf(primaryColor)
+                locationIcon.imageTintList = primaryList
+                locationCard.strokeColor = primaryColor
+                locationActionLabel.setText(R.string.location_label)
                 locationStatusText.text = getString(R.string.loading_address)
                 distanceText.visibility = View.VISIBLE
                 distanceText.text = getString(R.string.calculating_distance)
             } else {
-                locationStatusText.visibility = View.GONE
-                distanceText.visibility = View.GONE
+                locationCard.visibility = View.GONE
             }
         }
     }

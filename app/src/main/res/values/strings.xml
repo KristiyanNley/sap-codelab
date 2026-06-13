@@ -10,10 +10,13 @@
     <string name="memo_text_empty_error">Please provide a memo description</string>
     <string name="pick_location">Pick Location</string>
     <string name="confirm_location">Confirm</string>
-    <string name="no_location_selected">No location selected — notification will not be triggered</string>
+    <string name="no_location_selected">Tap to set a notification location</string>
     <string name="location_selected_format">Location: %1$.5f, %2$.5f</string>
     <string name="selected_location">Selected location</string>
     <string name="tap_map_to_select">Tap on the map to select a location</string>
+    <string name="add_location">Add Location</string>
+    <string name="edit_location">Edit Location</string>
+    <string name="location_label">Location</string>
     <string name="loading_address">Fetching address…</string>
     <string name="calculating_distance">Calculating distance…</string>
     <string name="search_location_hint">Search city, street, place…</string>

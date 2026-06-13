@@ -3,6 +3,7 @@ package com.sap.codelab.view.create
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
@@ -53,14 +54,34 @@ internal class CreateMemo : AppCompatActivity() {
 
         lifecycleScope.launch {
             model.locationDisplay.collect { address ->
-                if (address != null) {
-                    binding.contentCreateMemo.locationStatusText.text = address
-                }
+                updateLocationCard(address)
             }
         }
 
-        binding.contentCreateMemo.pickLocationButton.setOnClickListener {
+        binding.contentCreateMemo.locationCard.setOnClickListener {
             requestLocationPermissionAndOpenMap()
+        }
+    }
+
+    private fun updateLocationCard(address: String?) {
+        binding.contentCreateMemo.run {
+            if (address == null) {
+                locationActionLabel.setText(R.string.add_location)
+                locationStatusText.text = getString(R.string.no_location_selected)
+                val secondaryColor = ContextCompat.getColor(this@CreateMemo, android.R.color.darker_gray)
+                val secondaryList = ColorStateList.valueOf(secondaryColor)
+                locationIcon.imageTintList = secondaryList
+                pickLocationChevron.imageTintList = secondaryList
+                locationCard.strokeColor = secondaryColor
+            } else {
+                locationActionLabel.setText(R.string.edit_location)
+                locationStatusText.text = address
+                val primaryColor = ContextCompat.getColor(this@CreateMemo, R.color.colorPrimary)
+                val primaryList = ColorStateList.valueOf(primaryColor)
+                locationIcon.imageTintList = primaryList
+                pickLocationChevron.imageTintList = primaryList
+                locationCard.strokeColor = primaryColor
+            }
         }
     }
 
