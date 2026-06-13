@@ -1,9 +1,11 @@
 package com.sap.codelab.view.detail
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.sap.codelab.R
 import com.sap.codelab.databinding.ActivityViewMemoBinding
 import com.sap.codelab.model.Memo
 import kotlinx.coroutines.launch
@@ -50,6 +52,16 @@ internal class ViewMemo : AppCompatActivity() {
             memoDescription.setText(memo.description)
             memoTitle.isEnabled = false
             memoDescription.isEnabled = false
+            pickLocationButton.visibility = View.GONE
+            if (memo.reminderLatitude != 0.0 || memo.reminderLongitude != 0.0) {
+                locationStatusText.text = getString(
+                    R.string.location_selected_format,
+                    memo.reminderLatitude,
+                    memo.reminderLongitude
+                )
+            } else {
+                locationStatusText.visibility = View.GONE
+            }
         }
     }
 }
