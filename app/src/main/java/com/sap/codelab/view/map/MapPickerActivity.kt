@@ -4,11 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.sap.codelab.R
 import com.sap.codelab.databinding.ActivityMapPickerBinding
+import kotlinx.coroutines.launch
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -33,6 +36,7 @@ internal class MapPickerActivity : AppCompatActivity() {
 
         model = ViewModelProvider(this)[MapPickerViewModel::class.java]
         setupMap()
+        observeAddress()
     }
 
     private fun setupMap() {
@@ -47,11 +51,28 @@ internal class MapPickerActivity : AppCompatActivity() {
             override fun singleTapConfirmedHelper(point: GeoPoint): Boolean {
                 placeMarker(point)
                 model.selectLocation(point.latitude, point.longitude)
+                showAddressLoading()
                 return true
             }
             override fun longPressHelper(point: GeoPoint): Boolean = false
         })
         binding.mapView.overlays.add(0, tapOverlay)
+    }
+
+    private fun observeAddress() {
+        lifecycleScope.launch {
+            model.address.collect { address ->
+                if (address != null) {
+                    binding.addressCard.visibility = View.VISIBLE
+                    binding.addressPreviewText.text = address
+                }
+            }
+        }
+    }
+
+    private fun showAddressLoading() {
+        binding.addressCard.visibility = View.VISIBLE
+        binding.addressPreviewText.text = getString(R.string.loading_address)
     }
 
     private fun placeMarker(point: GeoPoint) {

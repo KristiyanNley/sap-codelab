@@ -8,60 +8,63 @@ import androidx.lifecycle.lifecycleScope
 import com.sap.codelab.R
 import com.sap.codelab.databinding.ActivityViewMemoBinding
 import com.sap.codelab.model.Memo
+import com.sap.codelab.utils.location.LocationUtils
 import kotlinx.coroutines.launch
 
 internal const val BUNDLE_MEMO_ID: String = "memoId"
 
-/**
- * Activity that allows a user to see the details of a memo.
- */
 internal class ViewMemo : AppCompatActivity() {
 
     private lateinit var binding: ActivityViewMemoBinding
+    private lateinit var model: ViewMemoViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityViewMemoBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-        // Initialize views with the passed memo id
-        val model = ViewModelProvider(this)[ViewMemoViewModel::class.java]
+
+        model = ViewModelProvider(this)[ViewMemoViewModel::class.java]
+
         if (savedInstanceState == null) {
-            // Observe the memo state flow for changes
             lifecycleScope.launch {
-                model.memo.collect { value ->
-                    value?.let { memo ->
-                        // Update the UI whenever the memo changes
-                        updateUI(memo)
-                    }
-                }
+                model.memo.collect { memo -> memo?.let { bindMemo(it) } }
             }
-            val id = intent.getLongExtra(BUNDLE_MEMO_ID, -1)
-            model.loadMemo(id)
+            lifecycleScope.launch {
+                model.address.collect { address -> address?.let { showAddress(it) } }
+            }
+            lifecycleScope.launch {
+                model.distanceMeters.collect { distance -> distance?.let { showDistance(it) } }
+            }
+            model.loadMemo(intent.getLongExtra(BUNDLE_MEMO_ID, -1))
         }
     }
 
-    /**
-     * Updates the UI with the given memo details.
-     *
-     * @param memo - the memo whose details are to be displayed.
-     */
-    private fun updateUI(memo: Memo) {
+    private fun bindMemo(memo: Memo) {
         binding.contentCreateMemo.run {
             memoTitle.setText(memo.title)
             memoDescription.setText(memo.description)
             memoTitle.isEnabled = false
             memoDescription.isEnabled = false
             pickLocationButton.visibility = View.GONE
-            if (memo.reminderLatitude != 0.0 || memo.reminderLongitude != 0.0) {
-                locationStatusText.text = getString(
-                    R.string.location_selected_format,
-                    memo.reminderLatitude,
-                    memo.reminderLongitude
-                )
+
+            val hasLocation = memo.reminderLatitude != 0.0 || memo.reminderLongitude != 0.0
+            if (hasLocation) {
+                locationStatusText.text = getString(R.string.loading_address)
+                distanceText.visibility = View.VISIBLE
+                distanceText.text = getString(R.string.calculating_distance)
             } else {
                 locationStatusText.visibility = View.GONE
+                distanceText.visibility = View.GONE
             }
         }
+    }
+
+    private fun showAddress(address: String) {
+        binding.contentCreateMemo.locationStatusText.text = address
+    }
+
+    private fun showDistance(meters: Int) {
+        binding.contentCreateMemo.distanceText.text = LocationUtils.formatDistance(meters)
     }
 }
