@@ -20,7 +20,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Map + floating cards stacked in a FrameLayout -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -31,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!-- Floating search bar -->
+        <!-- Floating search card that expands with suggestions -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/search_card"
             android:layout_width="match_parent"
@@ -44,34 +43,58 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="8dp">
+                android:orientation="vertical">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_search"
-                    android:tint="?android:attr/textColorSecondary" />
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/search_input"
-                    android:layout_width="0dp"
+                <!-- Search input row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@null"
-                    android:hint="@string/search_location_hint"
-                    android:imeOptions="actionSearch"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:padding="14dp" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="8dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_search"
+                        android:tint="?android:attr/textColorSecondary" />
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/search_input"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:hint="@string/search_location_hint"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:padding="14dp" />
+
+                </LinearLayout>
+
+                <!-- Divider shown when suggestions are visible -->
+                <View
+                    android:id="@+id/suggestions_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/listDivider"
+                    android:visibility="gone" />
+
+                <!-- Suggestions list -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/suggestions_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Address preview card at the bottom -->
+        <!-- Address preview at the bottom -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/address_card"
             android:layout_width="match_parent"

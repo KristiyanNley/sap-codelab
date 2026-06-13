@@ -2,6 +2,8 @@ package com.sap.codelab.view.map
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -11,6 +13,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.sap.codelab.R
 import com.sap.codelab.databinding.ActivityMapPickerBinding
 import kotlinx.coroutines.launch
@@ -27,6 +31,7 @@ internal class MapPickerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMapPickerBinding
     private lateinit var model: MapPickerViewModel
+    private lateinit var suggestionAdapter: SuggestionAdapter
     private var marker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +59,9 @@ internal class MapPickerActivity : AppCompatActivity() {
             override fun singleTapConfirmedHelper(point: GeoPoint): Boolean {
                 placeMarker(point)
                 model.selectLocation(point.latitude, point.longitude)
+                model.clearSuggestions()
                 showAddressLoading()
+                hideKeyboard()
                 return true
             }
             override fun longPressHelper(point: GeoPoint): Boolean = false
@@ -63,19 +70,45 @@ internal class MapPickerActivity : AppCompatActivity() {
     }
 
     private fun setupSearch() {
+        suggestionAdapter = SuggestionAdapter { place ->
+            binding.searchInput.setText(place.displayName)
+            binding.searchInput.setSelection(place.displayName.length)
+            model.onSuggestionSelected(place)
+            hideKeyboard()
+        }
+
+        binding.suggestionsRecycler.apply {
+            layoutManager = LinearLayoutManager(this@MapPickerActivity)
+            adapter = suggestionAdapter
+            addItemDecoration(DividerItemDecoration(this@MapPickerActivity, LinearLayoutManager.VERTICAL))
+        }
+
+        binding.searchInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) {
+                model.onQueryChanged(s?.toString().orEmpty())
+            }
+        })
+
         binding.searchInput.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val query = binding.searchInput.text?.toString().orEmpty()
-                model.searchLocation(query)
+                model.searchLocation(binding.searchInput.text?.toString().orEmpty())
                 hideKeyboard()
                 true
-            } else {
-                false
-            }
+            } else false
         }
     }
 
     private fun observeViewModel() {
+        lifecycleScope.launch {
+            model.suggestions.collect { suggestions ->
+                val hasSuggestions = suggestions.isNotEmpty()
+                suggestionAdapter.submitList(suggestions)
+                binding.suggestionsRecycler.visibility = if (hasSuggestions) View.VISIBLE else View.GONE
+                binding.suggestionsDivider.visibility = if (hasSuggestions) View.VISIBLE else View.GONE
+            }
+        }
         lifecycleScope.launch {
             model.address.collect { address ->
                 if (address != null) {
