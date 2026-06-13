@@ -8,9 +8,9 @@ import com.sap.codelab.model.Memo
 internal interface IMemoRepository {
 
     /**
-     * Saves the given memo to the database.
+     * Saves the given memo to the database and returns its assigned id.
      */
-    fun saveMemo(memo: Memo)
+    fun saveMemo(memo: Memo): Long
 
     /**
      * @return all memos currently in the database.

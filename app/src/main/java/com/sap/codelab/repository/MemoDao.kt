@@ -25,10 +25,10 @@ internal interface MemoDao {
     fun getOpen(): List<Memo>
 
     /**
-     * Inserts the given Memo into the database. We currently do not support updating of memos.
+     * Inserts the given Memo into the database and returns the auto-generated row id.
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(memo: Memo)
+    fun insert(memo: Memo): Long
 
     /**
      * @return the memo whose id matches the given id.

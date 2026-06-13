@@ -1,47 +1,54 @@
 package com.sap.codelab.view.create
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import com.sap.codelab.location.GeofenceManager
 import com.sap.codelab.model.Memo
 import com.sap.codelab.repository.Repository
 import com.sap.codelab.utils.coroutines.ScopeProvider
 import com.sap.codelab.utils.extensions.empty
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel for matching CreateMemo view. Handles user interactions.
- */
-internal class CreateMemoViewModel : ViewModel() {
+internal class CreateMemoViewModel(application: Application) : AndroidViewModel(application) {
 
-    private var memo = Memo(0, String.empty(), String.empty(), 0, 0, 0, false)
+    private var title: String = String.empty()
+    private var description: String = String.empty()
+    private var latitude: Double = 0.0
+    private var longitude: Double = 0.0
 
-    /**
-     * Saves the memo in it's current state.
-     */
+    fun setLocation(lat: Double, lng: Double) {
+        latitude = lat
+        longitude = lng
+    }
+
+    fun hasLocation(): Boolean = latitude != 0.0 || longitude != 0.0
+
     fun saveMemo() {
+        val memo = Memo(
+            id = 0,
+            title = title,
+            description = description,
+            reminderDate = 0,
+            reminderLatitude = latitude,
+            reminderLongitude = longitude,
+            isDone = false
+        )
         ScopeProvider.application.launch {
-            Repository.saveMemo(memo)
+            val memoId = Repository.saveMemo(memo)
+            if (hasLocation()) {
+                GeofenceManager.registerGeofence(getApplication(), memoId, latitude, longitude)
+            }
         }
     }
 
-    /**
-     * Call this method to update the memo. This is usually needed when the user changed his input.
-     */
-    fun updateMemo(title: String, description: String) {
-        memo = Memo(title = title, description = description, id = 0, reminderDate = 0, reminderLatitude = 0, reminderLongitude = 0, isDone = false)
+    fun updateMemo(newTitle: String, newDescription: String) {
+        title = newTitle
+        description = newDescription
     }
 
-    /**
-     * @return true if the title and content are not blank; false otherwise.
-     */
-    fun isMemoValid(): Boolean = memo.title.isNotBlank() && memo.description.isNotBlank()
+    fun isMemoValid(): Boolean = title.isNotBlank() && description.isNotBlank()
 
-    /**
-     * @return true if the memo text is blank, false otherwise.
-     */
-    fun hasTextError() = memo.description.isBlank()
+    fun hasTextError(): Boolean = description.isBlank()
 
-    /**
-     * @return true if the memo title is blank, false otherwise.
-     */
-    fun hasTitleError() = memo.title.isBlank()
+    fun hasTitleError(): Boolean = title.isBlank()
 }

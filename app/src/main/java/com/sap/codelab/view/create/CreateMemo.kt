@@ -1,22 +1,47 @@
 package com.sap.codelab.view.create
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.sap.codelab.R
 import com.sap.codelab.databinding.ActivityCreateMemoBinding
 import com.sap.codelab.utils.extensions.empty
+import com.sap.codelab.view.map.EXTRA_LATITUDE
+import com.sap.codelab.view.map.EXTRA_LONGITUDE
+import com.sap.codelab.view.map.MapPickerActivity
 
-/**
- * Activity that allows a user to create a new Memo.
- */
 internal class CreateMemo : AppCompatActivity() {
 
     private lateinit var binding: ActivityCreateMemoBinding
     private lateinit var model: CreateMemoViewModel
+
+    private val mapPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val lat = result.data?.getDoubleExtra(EXTRA_LATITUDE, 0.0) ?: 0.0
+            val lng = result.data?.getDoubleExtra(EXTRA_LONGITUDE, 0.0) ?: 0.0
+            model.setLocation(lat, lng)
+            binding.contentCreateMemo.locationStatusText.text =
+                getString(R.string.location_selected_format, lat, lng)
+        }
+    }
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
+            openMapPicker()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +49,29 @@ internal class CreateMemo : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         model = ViewModelProvider(this)[CreateMemoViewModel::class.java]
+
+        binding.contentCreateMemo.pickLocationButton.setOnClickListener {
+            requestLocationPermissionAndOpenMap()
+        }
+    }
+
+    private fun requestLocationPermissionAndOpenMap() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            openMapPicker()
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    private fun openMapPicker() {
+        mapPickerLauncher.launch(Intent(this, MapPickerActivity::class.java))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -31,23 +79,16 @@ internal class CreateMemo : AppCompatActivity() {
         return true
     }
 
-    /**
-     * Handles actionbar interactions.
-     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_save -> {
                 saveMemo()
                 true
             }
-
-            else             -> super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
-    /**
-     * Saves the memo if the input is valid; otherwise shows the corresponding error messages.
-     */
     private fun saveMemo() {
         binding.contentCreateMemo.run {
             model.updateMemo(memoTitle.text.toString(), memoDescription.text.toString())
@@ -62,18 +103,7 @@ internal class CreateMemo : AppCompatActivity() {
         }
     }
 
-    /**
-     * Returns the error message if there is an error, or an empty string otherwise.
-     *
-     * @param hasError          - whether there is an error.
-     * @param errorMessageResId - the resource id of the error message to show.
-     * @return the error message if there is an error, or an empty string otherwise.
-     */
     private fun getErrorMessage(hasError: Boolean, @StringRes errorMessageResId: Int): String {
-        return if (hasError) {
-            getString(errorMessageResId)
-        } else {
-            String.empty()
-        }
+        return if (hasError) getString(errorMessageResId) else String.empty()
     }
 }

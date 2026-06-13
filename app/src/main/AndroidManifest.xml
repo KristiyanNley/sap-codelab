@@ -2,6 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sap.codelab">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name=".repository.App"
         android:icon="@mipmap/ic_launcher"
@@ -9,25 +17,46 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name="com.sap.codelab.view.home.Home"
             android:exported="true"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="com.sap.codelab.view.create.CreateMemo"
             android:exported="false"
             android:label="@string/new_memo"
             android:theme="@style/AppTheme.NoActionBar" />
+
         <activity
             android:name="com.sap.codelab.view.detail.ViewMemo"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name="com.sap.codelab.view.map.MapPickerActivity"
+            android:exported="false"
+            android:label="@string/pick_location"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <receiver
+            android:name="com.sap.codelab.location.GeofenceBroadcastReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name="com.sap.codelab.location.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

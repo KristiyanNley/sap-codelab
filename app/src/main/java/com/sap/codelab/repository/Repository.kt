@@ -15,13 +15,13 @@ internal object Repository : IMemoRepository {
     private lateinit var database: Database
 
     fun initialize(applicationContext: Context) {
-        database = Room.databaseBuilder(applicationContext, Database::class.java, DATABASE_NAME).build()
+        database = Room.databaseBuilder(applicationContext, Database::class.java, DATABASE_NAME)
+            .fallbackToDestructiveMigration(true)
+            .build()
     }
 
     @WorkerThread
-    override fun saveMemo(memo: Memo) {
-        database.getMemoDao().insert(memo)
-    }
+    override fun saveMemo(memo: Memo): Long = database.getMemoDao().insert(memo)
 
     @WorkerThread
     override fun getOpen(): List<Memo> = database.getMemoDao().getOpen()

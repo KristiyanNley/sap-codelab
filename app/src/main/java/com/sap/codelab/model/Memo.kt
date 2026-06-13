@@ -19,9 +19,9 @@ internal data class Memo(
         @ColumnInfo(name = "reminderDate")
         var reminderDate: Long,
         @ColumnInfo(name = "reminderLatitude")
-        var reminderLatitude: Long,
+        var reminderLatitude: Double,
         @ColumnInfo(name = "reminderLongitude")
-        var reminderLongitude: Long,
+        var reminderLongitude: Double,
         @ColumnInfo(name = "isDone")
         var isDone: Boolean = false
 )

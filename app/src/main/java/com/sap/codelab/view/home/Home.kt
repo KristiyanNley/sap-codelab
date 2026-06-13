@@ -1,6 +1,9 @@
 package com.sap.codelab.view.home
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -8,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.coroutineScope
 import com.sap.codelab.R
@@ -27,6 +31,9 @@ internal class Home : AppCompatActivity() {
     private lateinit var model: HomeViewModel
     private lateinit var menuItemShowAll: MenuItem
     private lateinit var menuItemShowOpen: MenuItem
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* notification shown or denied — no further action needed */ }
     private val createMemoLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             model.refreshMemos()
@@ -40,6 +47,8 @@ internal class Home : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         model = ViewModelProvider(this)[HomeViewModel::class.java]
 
+        requestNotificationPermissionIfNeeded()
+
         // Setup the adapter and the recycler view
         setupRecyclerView(initializeAdapter())
 
@@ -48,6 +57,15 @@ internal class Home : AppCompatActivity() {
             createMemoLauncher.launch(Intent(this@Home, CreateMemo::class.java))
         }
         model.loadOpenMemos()
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     /**
