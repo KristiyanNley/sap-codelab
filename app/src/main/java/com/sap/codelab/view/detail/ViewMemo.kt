@@ -68,6 +68,6 @@ internal class ViewMemo : AppCompatActivity() {
     }
 
     private fun showDistance(meters: Int) {
-        binding.contentCreateMemo.distanceText.text = LocationUtils.formatDistance(meters)
+        binding.contentCreateMemo.distanceText.text = LocationUtils.formatDistance(this, meters)
     }
 }
