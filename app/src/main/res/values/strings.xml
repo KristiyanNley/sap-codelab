@@ -34,12 +34,16 @@
     <string name="grant_permission">Grant</string>
     <string name="not_now">Not Now</string>
     <string name="retry">Retry</string>
+    <string name="allow">Allow</string>
+    <string name="dont_allow">Don\'t Allow</string>
 
     <!-- Location permission denied (soft, Snackbar) -->
     <string name="location_permission_needed">Location permission is needed to pick a reminder spot.</string>
 
     <!-- Background location -->
     <string name="background_location_denied_message">Background location was denied. Reminders may not fire when the app is closed. You can enable it in Settings.</string>
+    <string name="background_location_rationale_title">Background Location Needed</string>
+    <string name="background_location_rationale_message">To receive reminders when the app is closed, allow location access \"All the time\" in Settings.</string>
 
     <!-- Distance display -->
     <string name="distance_meters">%1$dm away</string>

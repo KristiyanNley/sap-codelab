@@ -30,6 +30,8 @@ internal class CreateMemo : AppCompatActivity() {
 
     private lateinit var binding: ActivityCreateMemoBinding
     private lateinit var model: CreateMemoViewModel
+    private var menuItemSave: MenuItem? = null
+    private var pendingMapOpen = false
 
     private val mapPickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -94,15 +96,25 @@ internal class CreateMemo : AppCompatActivity() {
         binding.contentCreateMemo.locationCard.setOnClickListener {
             requestLocationPermissionAndOpenMap()
         }
+
+        if (!PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
+            !shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) &&
+            PermissionUtils.hasBeenRequested(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        ) {
+            showLocationPermissionDenied()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        // Restore content if the user granted location from Settings
         if (PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
             binding.locationPermissionDenied.root.visibility == View.VISIBLE
         ) {
             showContent()
+        }
+        if (pendingMapOpen) {
+            pendingMapOpen = false
+            openMapPicker()
         }
     }
 
@@ -135,10 +147,32 @@ internal class CreateMemo : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
             !PermissionUtils.isGranted(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         ) {
-            backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                !PermissionUtils.hasBeenRequested(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            ) {
+                showBackgroundLocationRationaleDialog()
+            } else {
+                openMapPicker()
+            }
         } else {
             openMapPicker()
         }
+    }
+
+    private fun showBackgroundLocationRationaleDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.background_location_rationale_title)
+            .setMessage(R.string.background_location_rationale_message)
+            .setPositiveButton(R.string.allow) { _, _ ->
+                PermissionUtils.markRequested(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                pendingMapOpen = true
+                PermissionUtils.openAppSettings(this)
+            }
+            .setNegativeButton(R.string.dont_allow) { _, _ ->
+                PermissionUtils.markRequested(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                openMapPicker()
+            }
+            .show()
     }
 
     private fun showLocationRationaleDialog() {
@@ -160,11 +194,13 @@ internal class CreateMemo : AppCompatActivity() {
     private fun showLocationPermissionDenied() {
         binding.contentCreateMemo.root.visibility = View.GONE
         binding.locationPermissionDenied.root.visibility = View.VISIBLE
+        menuItemSave?.isVisible = false
     }
 
     private fun showContent() {
         binding.locationPermissionDenied.root.visibility = View.GONE
         binding.contentCreateMemo.root.visibility = View.VISIBLE
+        menuItemSave?.isVisible = true
     }
 
     private fun openMapPicker() {
@@ -195,6 +231,8 @@ internal class CreateMemo : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_create_memo, menu)
+        menuItemSave = menu.findItem(R.id.action_save)
+        menuItemSave?.isVisible = binding.locationPermissionDenied.root.visibility != View.VISIBLE
         return true
     }
 

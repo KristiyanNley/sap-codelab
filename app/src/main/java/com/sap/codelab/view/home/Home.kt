@@ -29,9 +29,13 @@ internal class Home : AppCompatActivity() {
     private lateinit var menuItemShowAll: MenuItem
     private lateinit var menuItemShowOpen: MenuItem
 
+    private var notificationPermissionLaunchPending = false
+    private var notificationPermissionRequested = false
+
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
+        notificationPermissionLaunchPending = false
         PermissionUtils.markRequested(this, Manifest.permission.POST_NOTIFICATIONS)
         updateNotificationBanner()
     }
@@ -53,13 +57,20 @@ internal class Home : AppCompatActivity() {
             PermissionUtils.openAppSettings(this)
         }
 
-        requestNotificationPermissionIfNeeded()
         setupRecyclerView(initializeAdapter())
 
         binding.fab.setOnClickListener {
             createMemoLauncher.launch(Intent(this@Home, CreateMemo::class.java))
         }
         model.loadOpenMemos()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (!notificationPermissionRequested) {
+            notificationPermissionRequested = true
+            requestNotificationPermissionIfNeeded()
+        }
     }
 
     override fun onResume() {
@@ -70,21 +81,20 @@ internal class Home : AppCompatActivity() {
     private fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
         if (PermissionUtils.isGranted(this, Manifest.permission.POST_NOTIFICATIONS)) return
-
-        if (PermissionUtils.hasBeenRequested(this, Manifest.permission.POST_NOTIFICATIONS)) {
-            // Already asked before — show banner instead of re-prompting
-            updateNotificationBanner()
-        } else {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
+        // Always let Android decide: it shows the dialog if possible, fires the callback
+        // silently if permanently denied. We never pre-check SharedPrefs here because stale
+        // data from a previous install would otherwise skip the dialog entirely.
+        notificationPermissionLaunchPending = true
+        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     private fun updateNotificationBanner() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-        val shouldShow = !PermissionUtils.isGranted(this, Manifest.permission.POST_NOTIFICATIONS) &&
+        if (notificationPermissionLaunchPending) return
+        val isDenied = !PermissionUtils.isGranted(this, Manifest.permission.POST_NOTIFICATIONS) &&
             PermissionUtils.hasBeenRequested(this, Manifest.permission.POST_NOTIFICATIONS)
         binding.contentHome.notificationPermissionBanner.visibility =
-            if (shouldShow) View.VISIBLE else View.GONE
+            if (isDenied) View.VISIBLE else View.GONE
     }
 
     private fun initializeAdapter(): MemoAdapter {
