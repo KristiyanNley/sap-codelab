@@ -4,18 +4,23 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.os.Build
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.sap.codelab.R
 import com.sap.codelab.databinding.ActivityCreateMemoBinding
 import com.sap.codelab.utils.extensions.empty
+import com.sap.codelab.utils.permission.PermissionUtils
 import com.sap.codelab.view.map.EXTRA_LATITUDE
 import com.sap.codelab.view.map.EXTRA_LONGITUDE
 import com.sap.codelab.view.map.MapPickerActivity
@@ -40,9 +45,33 @@ internal class CreateMemo : AppCompatActivity() {
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
-            openMapPicker()
+        PermissionUtils.markRequested(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        when {
+            permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
+                requestBackgroundLocationIfNeeded()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                // Denied once without "Don't ask again" — offer to retry
+                Snackbar.make(binding.root, R.string.location_permission_needed, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry) { requestLocationPermissionAndOpenMap() }
+                    .show()
+            }
+            else -> {
+                // Denied with "Don't ask again", or denied after rationale — show settings UI
+                showLocationPermissionDenied()
+            }
         }
+    }
+
+    private val backgroundLocationLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (!granted) {
+            Snackbar.make(binding.root, R.string.background_location_denied_message, Snackbar.LENGTH_LONG)
+                .setAction(R.string.open_settings) { PermissionUtils.openAppSettings(this) }
+                .show()
+        }
+        openMapPicker()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +80,10 @@ internal class CreateMemo : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         model = ViewModelProvider(this)[CreateMemoViewModel::class.java]
+
+        binding.locationPermissionDenied.openSettingsButton.setOnClickListener {
+            PermissionUtils.openAppSettings(this)
+        }
 
         lifecycleScope.launch {
             model.locationDisplay.collect { address ->
@@ -61,6 +94,81 @@ internal class CreateMemo : AppCompatActivity() {
         binding.contentCreateMemo.locationCard.setOnClickListener {
             requestLocationPermissionAndOpenMap()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Restore content if the user granted location from Settings
+        if (PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
+            binding.locationPermissionDenied.root.visibility == View.VISIBLE
+        ) {
+            showContent()
+        }
+    }
+
+    private fun requestLocationPermissionAndOpenMap() {
+        when {
+            PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                requestBackgroundLocationIfNeeded()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                // Previously denied once — explain why before asking again
+                showLocationRationaleDialog()
+            }
+            PermissionUtils.hasBeenRequested(this, Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                // Has been asked before but shouldShowRationale is false → permanently denied
+                showLocationPermissionDenied()
+            }
+            else -> {
+                // First time asking
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        }
+    }
+
+    private fun requestBackgroundLocationIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            !PermissionUtils.isGranted(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        ) {
+            backgroundLocationLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        } else {
+            openMapPicker()
+        }
+    }
+
+    private fun showLocationRationaleDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.location_permission_rationale_title)
+            .setMessage(R.string.location_permission_rationale_message)
+            .setPositiveButton(R.string.grant_permission) { _, _ ->
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+            .setNegativeButton(R.string.not_now, null)
+            .show()
+    }
+
+    private fun showLocationPermissionDenied() {
+        binding.contentCreateMemo.root.visibility = View.GONE
+        binding.locationPermissionDenied.root.visibility = View.VISIBLE
+    }
+
+    private fun showContent() {
+        binding.locationPermissionDenied.root.visibility = View.GONE
+        binding.contentCreateMemo.root.visibility = View.VISIBLE
+    }
+
+    private fun openMapPicker() {
+        mapPickerLauncher.launch(Intent(this, MapPickerActivity::class.java))
     }
 
     private fun updateLocationCard(address: String?) {
@@ -83,25 +191,6 @@ internal class CreateMemo : AppCompatActivity() {
                 locationCard.strokeColor = primaryColor
             }
         }
-    }
-
-    private fun requestLocationPermissionAndOpenMap() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
-            openMapPicker()
-        } else {
-            locationPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        }
-    }
-
-    private fun openMapPicker() {
-        mapPickerLauncher.launch(Intent(this, MapPickerActivity::class.java))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -129,11 +218,18 @@ internal class CreateMemo : AppCompatActivity() {
             } else {
                 memoTitleContainer.error = getErrorMessage(model.hasTitleError(), R.string.memo_title_empty_error)
                 memoDescription.error = getErrorMessage(model.hasTextError(), R.string.memo_text_empty_error)
+                if (model.hasLocationError()) {
+                    val errorColor = ContextCompat.getColor(this@CreateMemo, com.google.android.material.R.color.design_error)
+                    locationCard.strokeColor = errorColor
+                    locationIcon.imageTintList = ColorStateList.valueOf(errorColor)
+                    pickLocationChevron.imageTintList = ColorStateList.valueOf(errorColor)
+                    Snackbar.make(binding.root, R.string.memo_location_empty_error, Snackbar.LENGTH_LONG).show()
+                }
             }
         }
     }
 
-    private fun getErrorMessage(hasError: Boolean, @StringRes errorMessageResId: Int): String {
-        return if (hasError) getString(errorMessageResId) else String.empty()
+    private fun getErrorMessage(hasError: Boolean, @StringRes errorMessageResId: Int): String? {
+        return if (hasError) getString(errorMessageResId) else null
     }
 }

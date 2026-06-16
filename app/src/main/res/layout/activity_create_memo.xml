@@ -21,4 +21,12 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <include android:id="@+id/content_create_memo" layout="@layout/content_create_memo" />
+
+    <include
+        android:id="@+id/location_permission_denied"
+        layout="@layout/view_permission_denied"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
