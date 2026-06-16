@@ -8,6 +8,7 @@
     <string name="action_save">Save</string>
     <string name="memo_title_empty_error">Please provide a title for this memo</string>
     <string name="memo_text_empty_error">Please provide a memo description</string>
+    <string name="memo_location_empty_error">Please pick a location for this memo</string>
     <string name="pick_location">Pick Location</string>
     <string name="confirm_location">Confirm</string>
     <string name="no_location_selected">Tap to set a notification location</string>
@@ -21,4 +22,30 @@
     <string name="calculating_distance">Calculating distance…</string>
     <string name="search_location_hint">Search city, street, place…</string>
     <string name="location_not_found">Location not found. Try a different search.</string>
+
+    <!-- Permission denied states -->
+    <string name="permission_denied_title">Access Denied</string>
+    <string name="location_permission_denied_message">Location access is required to set a reminder spot on the map. Please grant it in Settings to continue.</string>
+    <string name="open_settings">Open Settings</string>
+
+    <!-- Location permission rationale dialog -->
+    <string name="location_permission_rationale_title">Location Access Needed</string>
+    <string name="location_permission_rationale_message">This app needs location access to let you pin a spot on the map. You\'ll get a notification when you arrive nearby.</string>
+    <string name="grant_permission">Grant</string>
+    <string name="not_now">Not Now</string>
+    <string name="retry">Retry</string>
+
+    <!-- Location permission denied (soft, Snackbar) -->
+    <string name="location_permission_needed">Location permission is needed to pick a reminder spot.</string>
+
+    <!-- Background location -->
+    <string name="background_location_denied_message">Background location was denied. Reminders may not fire when the app is closed. You can enable it in Settings.</string>
+
+    <!-- Distance display -->
+    <string name="distance_meters">%1$dm away</string>
+    <string name="distance_kilometers">%1$.1fkm away</string>
+
+    <!-- Notification permission banner -->
+    <string name="notification_permission_banner_title">Notifications Disabled</string>
+    <string name="notification_permission_banner_message">Enable notifications to receive reminders when you arrive at a memo\'s location.</string>
 </resources>
