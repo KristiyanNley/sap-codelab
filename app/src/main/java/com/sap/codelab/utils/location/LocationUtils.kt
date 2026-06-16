@@ -7,6 +7,7 @@ import android.location.Geocoder
 import android.location.Location
 import android.os.Build
 import com.google.android.gms.location.LocationServices
+import com.sap.codelab.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -85,8 +86,8 @@ internal object LocationUtils {
             }.getOrNull()
         }
 
-    fun formatDistance(meters: Int): String = when {
-        meters < 1000 -> "${meters}m away"
-        else -> "${"%.1f".format(meters / 1000.0)}km away"
+    fun formatDistance(context: Context, meters: Int): String = when {
+        meters < 1000 -> context.getString(R.string.distance_meters, meters)
+        else -> context.getString(R.string.distance_kilometers, meters / 1000.0f)
     }
 }

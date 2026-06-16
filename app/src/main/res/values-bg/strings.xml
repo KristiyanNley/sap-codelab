@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">SAP Codelab</string>
+    <string name="action_show_all">Покажи всички</string>
+    <string name="action_show_open">Покажи отворените</string>
+    <string name="memo_title">Заглавие</string>
+    <string name="new_memo">Нова бележка</string>
+    <string name="memo_text">Текст</string>
+    <string name="action_save">Запази</string>
+    <string name="memo_title_empty_error">Моля, въведете заглавие за тази бележка</string>
+    <string name="memo_text_empty_error">Моля, въведете описание на бележката</string>
+    <string name="memo_location_empty_error">Моля, изберете местоположение за тази бележка</string>
+    <string name="pick_location">Избери местоположение</string>
+    <string name="confirm_location">Потвърди</string>
+    <string name="no_location_selected">Докоснете, за да зададете местоположение за известие</string>
+    <string name="location_selected_format">Местоположение: %1$.5f, %2$.5f</string>
+    <string name="selected_location">Избрано местоположение</string>
+    <string name="tap_map_to_select">Докоснете картата, за да изберете местоположение</string>
+    <string name="add_location">Добави местоположение</string>
+    <string name="edit_location">Редактирай местоположение</string>
+    <string name="location_label">Местоположение</string>
+    <string name="loading_address">Зареждане на адрес…</string>
+    <string name="calculating_distance">Изчисляване на разстояние…</string>
+    <string name="search_location_hint">Търси град, улица, място…</string>
+    <string name="location_not_found">Местоположението не е намерено. Опитайте с различно търсене.</string>
+
+    <!-- Permission denied states -->
+    <string name="permission_denied_title">Достъпът е отказан</string>
+    <string name="location_permission_denied_message">Достъпът до местоположение е необходим, за да зададете точка за напомняне на картата. Моля, разрешете го в Настройките, за да продължите.</string>
+    <string name="open_settings">Отвори настройките</string>
+
+    <!-- Location permission rationale dialog -->
+    <string name="location_permission_rationale_title">Необходим е достъп до местоположение</string>
+    <string name="location_permission_rationale_message">Приложението се нуждае от достъп до местоположение, за да можете да маркирате точка на картата. Ще получите известие, когато пристигнете наблизо.</string>
+    <string name="grant_permission">Разреши</string>
+    <string name="not_now">Не сега</string>
+    <string name="retry">Опитай отново</string>
+
+    <!-- Location permission denied (soft, Snackbar) -->
+    <string name="location_permission_needed">Необходимо е разрешение за местоположение, за да изберете точка за напомняне.</string>
+
+    <!-- Background location -->
+    <string name="background_location_denied_message">Достъпът до местоположение на заден план е отказан. Напомнянията може да не работят, когато приложението е затворено. Можете да го разрешите в Настройките.</string>
+
+    <!-- Distance display -->
+    <string name="distance_meters">на %1$dm разстояние</string>
+    <string name="distance_kilometers">на %1$.1fkm разстояние</string>
+
+    <!-- Notification permission banner -->
+    <string name="notification_permission_banner_title">Известията са изключени</string>
+    <string name="notification_permission_banner_message">Разрешете известията, за да получавате напомняния, когато пристигнете на местоположението на бележка.</string>
+</resources>

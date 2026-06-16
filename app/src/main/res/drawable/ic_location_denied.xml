@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="180dp"
+    android:height="180dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Light green background circle -->
+    <path
+        android:fillColor="#F1F8E9"
+        android:pathData="M10,100 A90,90 0 1,0 190,100 A90,90 0 1,0 10,100 Z" />
+
+    <!-- Location pin body -->
+    <path
+        android:fillColor="#9CCC65"
+        android:pathData="M100,28 C80,28 64,44 64,64 C64,92 100,142 100,142 C100,142 136,92 136,64 C136,44 120,28 100,28 Z" />
+
+    <!-- Location pin inner hole -->
+    <path
+        android:fillColor="#F1F8E9"
+        android:pathData="M100,52 C93,52 88,57 88,64 C88,71 93,76 100,76 C107,76 112,71 112,64 C112,57 107,52 100,52 Z" />
+
+    <!-- Red denied badge circle -->
+    <path
+        android:fillColor="#F44336"
+        android:pathData="M118,150 A30,30 0 1,0 178,150 A30,30 0 1,0 118,150 Z" />
+
+    <!-- White X — line 1 -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M133,135 L163,165" />
+
+    <!-- White X — line 2 -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M163,135 L133,165" />
+
+</vector>

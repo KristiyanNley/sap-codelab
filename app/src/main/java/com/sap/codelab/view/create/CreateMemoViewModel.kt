@@ -56,9 +56,11 @@ internal class CreateMemoViewModel(application: Application) : AndroidViewModel(
         description = newDescription
     }
 
-    fun isMemoValid(): Boolean = title.isNotBlank() && description.isNotBlank()
+    fun isMemoValid(): Boolean = title.isNotBlank() && description.isNotBlank() && hasLocation()
 
     fun hasTextError(): Boolean = description.isBlank()
 
     fun hasTitleError(): Boolean = title.isBlank()
+
+    fun hasLocationError(): Boolean = !hasLocation()
 }
