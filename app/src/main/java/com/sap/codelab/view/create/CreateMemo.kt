@@ -106,10 +106,14 @@ internal class CreateMemo : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
-            binding.locationPermissionDenied.root.isVisible
+        val hasPermission = PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        if (hasPermission) {
+            PermissionUtils.markGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            if (binding.locationPermissionDenied.root.isVisible) showContent()
+        } else if (PermissionUtils.hasBeenGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
+            !binding.locationPermissionDenied.root.isVisible
         ) {
-            showContent()
+            showLocationPermissionDenied()
         }
         if (pendingMapOpen) {
             pendingMapOpen = false

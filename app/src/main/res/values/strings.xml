@@ -49,6 +49,10 @@
     <string name="distance_meters">%1$dm away</string>
     <string name="distance_kilometers">%1$.1fkm away</string>
 
+    <!-- Location permission banner (fine location missing entirely) -->
+    <string name="location_permission_banner_title">Location Permission Required</string>
+    <string name="location_permission_banner_message">Location access is required for reminders to work. Without it, you can\'t create memos or receive notifications.</string>
+
     <!-- Background location permission banner -->
     <string name="background_location_banner_title">Background Location Disabled</string>
     <string name="background_location_banner_message">Reminders won\'t fire when the app is closed. Open Settings and set location access to \"Allow all the time\".</string>

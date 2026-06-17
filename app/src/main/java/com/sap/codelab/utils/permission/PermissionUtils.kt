@@ -11,6 +11,7 @@ import androidx.core.content.edit
 internal object PermissionUtils {
 
     private const val PREF_NAME = "permission_requested"
+    private const val PREF_GRANTED = "permission_granted"
 
     fun isGranted(context: Context, permission: String): Boolean =
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
@@ -22,6 +23,15 @@ internal object PermissionUtils {
 
     fun hasBeenRequested(context: Context, permission: String): Boolean =
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .getBoolean(permission, false)
+
+    fun markGranted(context: Context, permission: String) {
+        context.getSharedPreferences(PREF_GRANTED, Context.MODE_PRIVATE)
+            .edit { putBoolean(permission, true) }
+    }
+
+    fun hasBeenGranted(context: Context, permission: String): Boolean =
+        context.getSharedPreferences(PREF_GRANTED, Context.MODE_PRIVATE)
             .getBoolean(permission, false)
 
     fun openAppSettings(context: Context) {

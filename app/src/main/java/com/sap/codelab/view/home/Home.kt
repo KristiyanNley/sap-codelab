@@ -72,6 +72,10 @@ internal class Home : AppCompatActivity() {
             PermissionUtils.openAppSettings(this)
         }
 
+        binding.contentHome.locationPermissionSettingsButton.setOnClickListener {
+            PermissionUtils.openAppSettings(this)
+        }
+
         binding.contentHome.backgroundLocationSettingsButton.setOnClickListener {
             PermissionUtils.openAppSettings(this)
         }
@@ -95,6 +99,7 @@ internal class Home : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateNotificationBanner()
+        updateLocationPermissionBanner()
         updateBackgroundLocationBanner()
     }
 
@@ -106,6 +111,15 @@ internal class Home : AppCompatActivity() {
         // data from a previous install would otherwise skip the dialog entirely.
         notificationPermissionLaunchPending = true
         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    private fun updateLocationPermissionBanner() {
+        val hasPermission = PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        if (hasPermission) PermissionUtils.markGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        val isMissing = !hasPermission &&
+            PermissionUtils.hasBeenGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        binding.contentHome.locationPermissionBanner.visibility =
+            if (isMissing) View.VISIBLE else View.GONE
     }
 
     private fun updateBackgroundLocationBanner() {
