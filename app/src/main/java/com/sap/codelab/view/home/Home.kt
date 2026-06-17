@@ -70,6 +70,10 @@ internal class Home : AppCompatActivity() {
             PermissionUtils.openAppSettings(this)
         }
 
+        binding.contentHome.backgroundLocationSettingsButton.setOnClickListener {
+            PermissionUtils.openAppSettings(this)
+        }
+
         setupRecyclerView(initializeAdapter())
 
         binding.fab.setOnClickListener {
@@ -89,6 +93,7 @@ internal class Home : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateNotificationBanner()
+        updateBackgroundLocationBanner()
     }
 
     private fun requestNotificationPermissionIfNeeded() {
@@ -99,6 +104,14 @@ internal class Home : AppCompatActivity() {
         // data from a previous install would otherwise skip the dialog entirely.
         notificationPermissionLaunchPending = true
         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    private fun updateBackgroundLocationBanner() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+        val needsBackground = PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
+            !PermissionUtils.isGranted(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        binding.contentHome.backgroundLocationBanner.visibility =
+            if (needsBackground) View.VISIBLE else View.GONE
     }
 
     private fun updateNotificationBanner() {
