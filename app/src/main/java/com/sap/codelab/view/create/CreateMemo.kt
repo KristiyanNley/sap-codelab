@@ -115,12 +115,6 @@ internal class CreateMemo : AppCompatActivity() {
             )
         }
 
-        if (!PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
-            !shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) &&
-            PermissionUtils.hasBeenRequested(this, Manifest.permission.ACCESS_FINE_LOCATION)
-        ) {
-            showLocationPermissionDenied()
-        }
     }
 
     override fun onResume() {
