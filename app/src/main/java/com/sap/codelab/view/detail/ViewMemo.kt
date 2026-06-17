@@ -29,6 +29,7 @@ internal class ViewMemo : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         model = ViewModelProvider(this)[ViewMemoViewModel::class.java]
+        binding.contentCreateMemo.nearbyPlacesCompose.visibility = View.GONE
 
         if (savedInstanceState == null) {
             lifecycleScope.launch { model.memo.collect { memo -> memo?.let { bindMemo(it) } } }

@@ -1,17 +1,30 @@
 package com.sap.codelab.view.create
 
+import android.annotation.SuppressLint
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.location.LocationServices
 import com.sap.codelab.location.GeofenceManager
 import com.sap.codelab.model.Memo
+import com.sap.codelab.model.NearbyPlace
 import com.sap.codelab.repository.Repository
 import com.sap.codelab.utils.coroutines.ScopeProvider
 import com.sap.codelab.utils.extensions.empty
 import com.sap.codelab.utils.location.LocationUtils
+import com.sap.codelab.utils.location.OverpassService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+
+internal sealed interface NearbyPlacesUiState {
+    data object Idle : NearbyPlacesUiState
+    data object Loading : NearbyPlacesUiState
+    data class Success(val places: List<NearbyPlace>) : NearbyPlacesUiState
+    data object Error : NearbyPlacesUiState
+}
 
 internal class CreateMemoViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -22,6 +35,32 @@ internal class CreateMemoViewModel(application: Application) : AndroidViewModel(
 
     private val _locationDisplay: MutableStateFlow<String?> = MutableStateFlow(null)
     val locationDisplay: StateFlow<String?> = _locationDisplay
+
+    private val _nearbyPlacesState: MutableStateFlow<NearbyPlacesUiState> = MutableStateFlow(NearbyPlacesUiState.Idle)
+    val nearbyPlacesState: StateFlow<NearbyPlacesUiState> = _nearbyPlacesState
+
+    @SuppressLint("MissingPermission")
+    fun loadNearbyPlaces() {
+        _nearbyPlacesState.value = NearbyPlacesUiState.Loading
+        viewModelScope.launch {
+            val location = suspendCancellableCoroutine<android.location.Location?> { cont ->
+                LocationServices.getFusedLocationProviderClient(getApplication())
+                    .lastLocation
+                    .addOnSuccessListener { cont.resume(it) }
+                    .addOnFailureListener { cont.resume(null) }
+            }
+            if (location == null) {
+                _nearbyPlacesState.value = NearbyPlacesUiState.Error
+                return@launch
+            }
+            val places = OverpassService.getNearbyPlaces(location.latitude, location.longitude)
+            _nearbyPlacesState.value = if (places.isNotEmpty()) {
+                NearbyPlacesUiState.Success(places)
+            } else {
+                NearbyPlacesUiState.Error
+            }
+        }
+    }
 
     fun setLocation(lat: Double, lng: Double) {
         latitude = lat

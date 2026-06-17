@@ -49,6 +49,12 @@
     <string name="distance_meters">%1$dm away</string>
     <string name="distance_kilometers">%1$.1fkm away</string>
 
+    <!-- Nearby places -->
+    <string name="nearby_places_title">Nearby Places (210–300 m)</string>
+    <string name="nearby_places_find">Find</string>
+    <string name="nearby_places_empty">No places found in this range</string>
+    <string name="nearby_places_retry">Retry</string>
+
     <!-- Notification permission banner -->
     <string name="notification_permission_banner_title">Notifications Disabled</string>
     <string name="notification_permission_banner_message">Enable notifications to receive reminders when you arrive at a memo\'s location.</string>

@@ -12,6 +12,8 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
@@ -97,6 +99,18 @@ internal class CreateMemo : AppCompatActivity() {
 
         binding.contentCreateMemo.locationCard.setOnClickListener {
             requestLocationPermissionAndOpenMap()
+        }
+
+        binding.contentCreateMemo.nearbyPlacesCompose.setContent {
+            val state by model.nearbyPlacesState.collectAsState()
+            NearbyPlacesSection(
+                state = state,
+                onRequestLoad = { model.loadNearbyPlaces() },
+                onPlaceSelected = { place ->
+                    binding.contentCreateMemo.locationStatusText.text = getString(R.string.loading_address)
+                    model.setLocation(place.latitude, place.longitude)
+                }
+            )
         }
 
         if (!PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
