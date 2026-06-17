@@ -10,7 +10,7 @@ import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 
-private const val GEOFENCE_RADIUS_METERS = 200f
+internal const val GEOFENCE_RADIUS_METERS = 200f
 private const val TAG = "GeofenceManager"
 
 internal object GeofenceManager {

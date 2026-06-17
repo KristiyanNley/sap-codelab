@@ -97,6 +97,8 @@ internal class CreateMemo : AppCompatActivity() {
             }
         }
 
+        binding.contentCreateMemo.triggerDistanceText.visibility = View.GONE
+
         binding.contentCreateMemo.locationCard.setOnClickListener {
             requestLocationPermissionAndOpenMap()
         }

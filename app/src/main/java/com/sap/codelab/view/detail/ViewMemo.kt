@@ -35,6 +35,7 @@ internal class ViewMemo : AppCompatActivity() {
             lifecycleScope.launch { model.memo.collect { memo -> memo?.let { bindMemo(it) } } }
             lifecycleScope.launch { model.address.collect { it?.let { addr -> showAddress(addr) } } }
             lifecycleScope.launch { model.distanceMeters.collect { it?.let { d -> showDistance(d) } } }
+            lifecycleScope.launch { model.triggerDistanceMeters.collect { it?.let { d -> showTriggerDistance(d) } } }
             model.loadMemo(intent.getLongExtra(BUNDLE_MEMO_ID, -1))
         }
     }
@@ -60,6 +61,8 @@ internal class ViewMemo : AppCompatActivity() {
                 locationStatusText.text = getString(R.string.loading_address)
                 distanceText.visibility = View.VISIBLE
                 distanceText.text = getString(R.string.calculating_distance)
+                triggerDistanceText.visibility = View.VISIBLE
+                triggerDistanceText.text = getString(R.string.calculating_distance)
             } else {
                 locationCard.visibility = View.GONE
             }
@@ -72,5 +75,13 @@ internal class ViewMemo : AppCompatActivity() {
 
     private fun showDistance(meters: Int) {
         binding.contentCreateMemo.distanceText.text = LocationUtils.formatDistance(this, meters)
+    }
+
+    private fun showTriggerDistance(metersUntilTrigger: Int) {
+        binding.contentCreateMemo.triggerDistanceText.text = if (metersUntilTrigger > 0) {
+            getString(R.string.trigger_distance_approaching, metersUntilTrigger)
+        } else {
+            getString(R.string.trigger_distance_inside)
+        }
     }
 }

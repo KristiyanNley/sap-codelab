@@ -49,6 +49,10 @@
     <string name="distance_meters">%1$dm away</string>
     <string name="distance_kilometers">%1$.1fkm away</string>
 
+    <!-- Distance until trigger -->
+    <string name="trigger_distance_approaching">%1$dm until notification triggers</string>
+    <string name="trigger_distance_inside">Inside notification zone</string>
+
     <!-- Nearby places -->
     <string name="nearby_places_title">Nearby Places (210–300 m)</string>
     <string name="nearby_places_find">Find</string>

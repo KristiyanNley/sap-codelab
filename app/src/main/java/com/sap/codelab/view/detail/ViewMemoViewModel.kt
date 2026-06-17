@@ -11,12 +11,16 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.sap.codelab.location.GEOFENCE_RADIUS_METERS
 import com.sap.codelab.model.Memo
 import com.sap.codelab.repository.Repository
 import com.sap.codelab.utils.location.LocationUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 private const val LOCATION_UPDATE_INTERVAL_MS = 2_000L
@@ -32,6 +36,10 @@ internal class ViewMemoViewModel(application: Application) : AndroidViewModel(ap
 
     private val _distanceMeters: MutableStateFlow<Int?> = MutableStateFlow(null)
     val distanceMeters: StateFlow<Int?> = _distanceMeters
+
+    val triggerDistanceMeters: StateFlow<Int?> = _distanceMeters
+        .map { it?.let { d -> maxOf(0, d - GEOFENCE_RADIUS_METERS.toInt()) } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(application)
 
