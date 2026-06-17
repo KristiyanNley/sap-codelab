@@ -92,12 +92,14 @@ internal class CreateMemo : AppCompatActivity() {
 
         binding.contentCreateMemo.nearbyPlacesCompose.setContent {
             val state by model.nearbyPlacesState.collectAsState()
+            val selectedPlace by model.selectedNearbyPlace.collectAsState()
             NearbyPlacesSection(
                 state = state,
+                selectedPlace = selectedPlace,
                 onRequestLoad = { model.loadNearbyPlaces() },
                 onPlaceSelected = { place ->
                     binding.contentCreateMemo.locationStatusText.text = getString(R.string.loading_address)
-                    model.setLocation(place.latitude, place.longitude)
+                    model.selectNearbyPlace(place)
                 }
             )
         }

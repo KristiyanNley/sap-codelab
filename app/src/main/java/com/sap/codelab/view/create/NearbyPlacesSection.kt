@@ -40,6 +40,7 @@ private val ColorPrimaryContainer = Color(0xFFDCEDC8)
 @Composable
 internal fun NearbyPlacesSection(
     state: NearbyPlacesUiState,
+    selectedPlace: NearbyPlace?,
     onRequestLoad: () -> Unit,
     onPlaceSelected: (NearbyPlace) -> Unit,
     modifier: Modifier = Modifier
@@ -62,6 +63,7 @@ internal fun NearbyPlacesSection(
                 is NearbyPlacesUiState.Loading -> LoadingContent()
                 is NearbyPlacesUiState.Success -> PlacesList(
                     places = state.places,
+                    selectedPlace = selectedPlace,
                     onPlaceSelected = onPlaceSelected
                 )
                 is NearbyPlacesUiState.Error -> ErrorContent(onRetry = onRequestLoad)
@@ -112,31 +114,45 @@ private fun LoadingContent() {
 }
 
 @Composable
-private fun PlacesList(places: List<NearbyPlace>, onPlaceSelected: (NearbyPlace) -> Unit) {
+private fun PlacesList(
+    places: List<NearbyPlace>,
+    selectedPlace: NearbyPlace?,
+    onPlaceSelected: (NearbyPlace) -> Unit
+) {
     LazyRow(
         modifier = Modifier.padding(top = 8.dp),
         contentPadding = PaddingValues(bottom = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(places) { place ->
-            PlaceCard(place = place, onClick = { onPlaceSelected(place) })
+            PlaceCard(
+                place = place,
+                isSelected = place == selectedPlace,
+                onClick = { onPlaceSelected(place) }
+            )
         }
     }
 }
 
 @Composable
-private fun PlaceCard(place: NearbyPlace, onClick: () -> Unit) {
+private fun PlaceCard(place: NearbyPlace, isSelected: Boolean, onClick: () -> Unit) {
     Card(
         onClick = onClick,
+        enabled = !isSelected,
         modifier = Modifier.width(148.dp),
-        colors = CardDefaults.cardColors(containerColor = ColorPrimaryContainer)
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) ColorPrimary else ColorPrimaryContainer,
+            disabledContainerColor = ColorPrimary
+        )
     ) {
+        val contentColor = if (isSelected) Color.White else Color.Unspecified
         Column(modifier = Modifier.padding(12.dp)) {
             Text(text = amenityEmoji(place.type), style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(4.dp))
             Text(
                 text = place.name,
                 style = MaterialTheme.typography.bodyMedium,
+                color = contentColor,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -144,7 +160,7 @@ private fun PlaceCard(place: NearbyPlace, onClick: () -> Unit) {
             Text(
                 text = stringResource(R.string.distance_meters, place.distanceMeters),
                 style = MaterialTheme.typography.labelSmall,
-                color = ColorPrimaryDark
+                color = if (isSelected) Color.White.copy(alpha = 0.8f) else ColorPrimaryDark
             )
         }
     }

@@ -39,6 +39,9 @@ internal class CreateMemoViewModel(application: Application) : AndroidViewModel(
     private val _nearbyPlacesState: MutableStateFlow<NearbyPlacesUiState> = MutableStateFlow(NearbyPlacesUiState.Idle)
     val nearbyPlacesState: StateFlow<NearbyPlacesUiState> = _nearbyPlacesState
 
+    private val _selectedNearbyPlace: MutableStateFlow<NearbyPlace?> = MutableStateFlow(null)
+    val selectedNearbyPlace: StateFlow<NearbyPlace?> = _selectedNearbyPlace
+
     @SuppressLint("MissingPermission")
     fun loadNearbyPlaces() {
         _nearbyPlacesState.value = NearbyPlacesUiState.Loading
@@ -60,6 +63,11 @@ internal class CreateMemoViewModel(application: Application) : AndroidViewModel(
                 NearbyPlacesUiState.Error
             }
         }
+    }
+
+    fun selectNearbyPlace(place: NearbyPlace) {
+        _selectedNearbyPlace.value = place
+        setLocation(place.latitude, place.longitude)
     }
 
     fun setLocation(lat: Double, lng: Double) {
