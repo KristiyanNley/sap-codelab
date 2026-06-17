@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+private const val SEARCH_DEBOUNCE_MS = 350L
+private const val MIN_SEARCH_QUERY_LENGTH = 2
+
 internal sealed class SearchResult {
     data class Found(val lat: Double, val lng: Double) : SearchResult()
     object NotFound : SearchResult()
@@ -39,12 +42,12 @@ internal class MapPickerViewModel(application: Application) : AndroidViewModel(a
 
     fun onQueryChanged(query: String) {
         suggestionJob?.cancel()
-        if (query.length < 2) {
+        if (query.length < MIN_SEARCH_QUERY_LENGTH) {
             _suggestions.value = emptyList()
             return
         }
         suggestionJob = viewModelScope.launch {
-            delay(350)
+            delay(SEARCH_DEBOUNCE_MS)
             _suggestions.value = NominatimService.getSuggestions(query, getApplication<Application>().packageName)
         }
     }

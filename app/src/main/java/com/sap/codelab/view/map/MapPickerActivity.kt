@@ -30,6 +30,11 @@ import org.osmdroid.views.overlay.Marker
 internal const val EXTRA_LATITUDE = "extra_latitude"
 internal const val EXTRA_LONGITUDE = "extra_longitude"
 
+private const val MAP_DEFAULT_ZOOM = 14.0
+private const val MAP_SEARCH_RESULT_ZOOM = 15.0
+private const val FALLBACK_LATITUDE_PARIS = 48.8566
+private const val FALLBACK_LONGITUDE_PARIS = 2.3522
+
 internal class MapPickerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMapPickerBinding
@@ -66,8 +71,8 @@ internal class MapPickerActivity : AppCompatActivity() {
         binding.mapView.apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
-            controller.setZoom(14.0)
-            controller.setCenter(GeoPoint(48.8566, 2.3522))
+            controller.setZoom(MAP_DEFAULT_ZOOM)
+            controller.setCenter(GeoPoint(FALLBACK_LATITUDE_PARIS, FALLBACK_LONGITUDE_PARIS))
         }
         centerOnCurrentLocation()
 
@@ -139,7 +144,7 @@ internal class MapPickerActivity : AppCompatActivity() {
                     is SearchResult.Found -> {
                         val point = GeoPoint(result.lat, result.lng)
                         placeMarker(point)
-                        binding.mapView.controller.setZoom(15.0)
+                        binding.mapView.controller.setZoom(MAP_SEARCH_RESULT_ZOOM)
                         binding.mapView.controller.animateTo(point)
                         showAddressLoading()
                     }

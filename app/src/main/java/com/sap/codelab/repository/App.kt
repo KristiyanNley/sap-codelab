@@ -5,6 +5,8 @@ import com.sap.codelab.notification.NotificationHelper
 import org.osmdroid.config.Configuration
 import java.io.File
 
+private const val OSMDROID_CACHE_DIR = "osmdroid"
+
 internal class App : Application() {
     override fun onCreate() {
         super.onCreate()
@@ -12,7 +14,7 @@ internal class App : Application() {
         NotificationHelper.createNotificationChannel(this)
         Configuration.getInstance().apply {
             userAgentValue = packageName
-            osmdroidTileCache = File(cacheDir, "osmdroid")
+            osmdroidTileCache = File(cacheDir, OSMDROID_CACHE_DIR)
         }
     }
 }
