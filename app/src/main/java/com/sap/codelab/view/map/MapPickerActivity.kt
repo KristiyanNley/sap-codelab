@@ -1,5 +1,6 @@
 package com.sap.codelab.view.map
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -15,6 +16,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.location.LocationServices
+import androidx.core.view.WindowCompat
 import com.sap.codelab.R
 import com.sap.codelab.databinding.ActivityMapPickerBinding
 import kotlinx.coroutines.launch
@@ -36,6 +39,7 @@ internal class MapPickerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityMapPickerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
@@ -47,6 +51,17 @@ internal class MapPickerActivity : AppCompatActivity() {
         observeViewModel()
     }
 
+    @SuppressLint("MissingPermission")
+    private fun centerOnCurrentLocation() {
+        LocationServices.getFusedLocationProviderClient(this)
+            .lastLocation
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    binding.mapView.controller.animateTo(GeoPoint(location.latitude, location.longitude))
+                }
+            }
+    }
+
     private fun setupMap() {
         binding.mapView.apply {
             setTileSource(TileSourceFactory.MAPNIK)
@@ -54,6 +69,7 @@ internal class MapPickerActivity : AppCompatActivity() {
             controller.setZoom(14.0)
             controller.setCenter(GeoPoint(48.8566, 2.3522))
         }
+        centerOnCurrentLocation()
 
         val tapOverlay = MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(point: GeoPoint): Boolean {
