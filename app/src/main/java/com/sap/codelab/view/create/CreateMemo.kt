@@ -50,19 +50,18 @@ internal class CreateMemo : AppCompatActivity() {
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        PermissionUtils.markRequested(this, Manifest.permission.ACCESS_FINE_LOCATION)
         when {
             permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
                 requestBackgroundLocationIfNeeded()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                // Denied once without "Don't ask again" — offer to retry
+                // Denied once, can still ask again — offer retry
                 Snackbar.make(binding.root, R.string.location_permission_needed, Snackbar.LENGTH_LONG)
                     .setAction(R.string.retry) { requestLocationPermissionAndOpenMap() }
                     .show()
             }
             else -> {
-                // Denied with "Don't ask again", or denied after rationale — show settings UI
+                // shouldShowRationale is false after requesting = permanently denied
                 showLocationPermissionDenied()
             }
         }
@@ -136,15 +135,13 @@ internal class CreateMemo : AppCompatActivity() {
                 requestBackgroundLocationIfNeeded()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                // Previously denied once — explain why before asking again
+                // Denied once — show rationale before asking again
                 showLocationRationaleDialog()
             }
-            PermissionUtils.hasBeenRequested(this, Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                // Has been asked before but shouldShowRationale is false → permanently denied
-                showLocationPermissionDenied()
-            }
             else -> {
-                // First time asking
+                // First time OR permanently denied — let the system decide.
+                // If permanently denied the callback fires immediately with granted=false
+                // and shouldShowRationale=false, which we detect there.
                 locationPermissionLauncher.launch(
                     arrayOf(
                         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -159,13 +156,7 @@ internal class CreateMemo : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
             !PermissionUtils.isGranted(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
-                !PermissionUtils.hasBeenRequested(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-            ) {
-                showBackgroundLocationRationaleDialog()
-            } else {
-                openMapPicker()
-            }
+            showBackgroundLocationRationaleDialog()
         } else {
             openMapPicker()
         }
@@ -176,12 +167,10 @@ internal class CreateMemo : AppCompatActivity() {
             .setTitle(R.string.background_location_rationale_title)
             .setMessage(R.string.background_location_rationale_message)
             .setPositiveButton(R.string.allow) { _, _ ->
-                PermissionUtils.markRequested(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                 pendingMapOpen = true
                 PermissionUtils.openAppSettings(this)
             }
             .setNegativeButton(R.string.dont_allow) { _, _ ->
-                PermissionUtils.markRequested(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                 openMapPicker()
             }
             .show()
