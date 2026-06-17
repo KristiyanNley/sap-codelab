@@ -7,8 +7,12 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.lifecycle.ViewModelProvider
@@ -48,10 +52,19 @@ internal class Home : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         model = ViewModelProvider(this)[HomeViewModel::class.java]
+
+        val fabMargin = resources.getDimensionPixelSize(R.dimen.fab_margin)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.fab) { view, insets ->
+            val navBar = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+            (view.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin = fabMargin + navBar
+            view.requestLayout()
+            insets
+        }
 
         binding.contentHome.notificationSettingsButton.setOnClickListener {
             PermissionUtils.openAppSettings(this)
