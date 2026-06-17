@@ -38,9 +38,11 @@ internal class Home : AppCompatActivity() {
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { granted ->
+    ) { _ ->
         notificationPermissionLaunchPending = false
-        PermissionUtils.markRequested(this, Manifest.permission.POST_NOTIFICATIONS)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            PermissionUtils.markRequested(this, Manifest.permission.POST_NOTIFICATIONS)
+        }
         updateNotificationBanner()
     }
 

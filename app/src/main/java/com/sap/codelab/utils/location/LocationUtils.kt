@@ -1,12 +1,9 @@
 package com.sap.codelab.utils.location
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Address
 import android.location.Geocoder
-import android.location.Location
 import android.os.Build
-import com.google.android.gms.location.LocationServices
 import com.sap.codelab.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -64,27 +61,6 @@ internal object LocationUtils {
         )
         return parts.joinToString(", ")
     }
-
-    @SuppressLint("MissingPermission")
-    suspend fun getDistanceMeters(context: Context, targetLat: Double, targetLng: Double): Int? =
-        withContext(Dispatchers.IO) {
-            runCatching {
-                val userLocation = suspendCancellableCoroutine<Location?> { cont ->
-                    LocationServices.getFusedLocationProviderClient(context)
-                        .lastLocation
-                        .addOnSuccessListener { cont.resume(it) }
-                        .addOnFailureListener { cont.resume(null) }
-                } ?: return@withContext null
-
-                val results = FloatArray(1)
-                Location.distanceBetween(
-                    userLocation.latitude, userLocation.longitude,
-                    targetLat, targetLng,
-                    results
-                )
-                results[0].toInt()
-            }.getOrNull()
-        }
 
     fun formatDistance(context: Context, meters: Int): String = when {
         meters < 1000 -> context.getString(R.string.distance_meters, meters)

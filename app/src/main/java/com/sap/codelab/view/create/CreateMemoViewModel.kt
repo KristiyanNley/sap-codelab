@@ -43,7 +43,7 @@ internal class CreateMemoViewModel(application: Application) : AndroidViewModel(
     fun loadNearbyPlaces() {
         _nearbyPlacesState.value = NearbyPlacesUiState.Loading
         viewModelScope.launch {
-            val location = suspendCancellableCoroutine<android.location.Location?> { cont ->
+            val location = suspendCancellableCoroutine { cont ->
                 LocationServices.getFusedLocationProviderClient(getApplication())
                     .lastLocation
                     .addOnSuccessListener { cont.resume(it) }

@@ -2,7 +2,6 @@ package com.sap.codelab.view.create
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
@@ -22,12 +21,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.sap.codelab.R
 import com.sap.codelab.databinding.ActivityCreateMemoBinding
-import com.sap.codelab.utils.extensions.empty
 import com.sap.codelab.utils.permission.PermissionUtils
 import com.sap.codelab.view.map.EXTRA_LATITUDE
 import com.sap.codelab.view.map.EXTRA_LONGITUDE
 import com.sap.codelab.view.map.MapPickerActivity
 import kotlinx.coroutines.launch
+import androidx.core.view.isVisible
 
 internal class CreateMemo : AppCompatActivity() {
 
@@ -65,17 +64,6 @@ internal class CreateMemo : AppCompatActivity() {
                 showLocationPermissionDenied()
             }
         }
-    }
-
-    private val backgroundLocationLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (!granted) {
-            Snackbar.make(binding.root, R.string.background_location_denied_message, Snackbar.LENGTH_LONG)
-                .setAction(R.string.open_settings) { PermissionUtils.openAppSettings(this) }
-                .show()
-        }
-        openMapPicker()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,7 +107,7 @@ internal class CreateMemo : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (PermissionUtils.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
-            binding.locationPermissionDenied.root.visibility == View.VISIBLE
+            binding.locationPermissionDenied.root.isVisible
         ) {
             showContent()
         }

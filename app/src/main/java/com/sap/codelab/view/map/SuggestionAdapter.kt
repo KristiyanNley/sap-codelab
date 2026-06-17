@@ -1,5 +1,6 @@
 package com.sap.codelab.view.map
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -12,6 +13,7 @@ internal class SuggestionAdapter(
 
     private val items = mutableListOf<NominatimPlace>()
 
+    @SuppressLint("NotifyDataSetChanged")
     fun submitList(suggestions: List<NominatimPlace>) {
         items.clear()
         items.addAll(suggestions)

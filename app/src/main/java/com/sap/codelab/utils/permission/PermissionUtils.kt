@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 
 internal object PermissionUtils {
 
@@ -16,7 +17,7 @@ internal object PermissionUtils {
 
     fun markRequested(context: Context, permission: String) {
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-            .edit().putBoolean(permission, true).apply()
+            .edit { putBoolean(permission, true) }
     }
 
     fun hasBeenRequested(context: Context, permission: String): Boolean =

@@ -1,10 +1,12 @@
 package com.sap.codelab.notification
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.sap.codelab.R
@@ -30,6 +32,7 @@ internal object NotificationHelper {
         manager.createNotificationChannel(channel)
     }
 
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     fun showMemoNotification(context: Context, memo: Memo) {
         val contentText = memo.description.take(NOTIFICATION_TEXT_LIMIT)
 
