@@ -244,7 +244,7 @@ internal class CreateMemo : AppCompatActivity() {
                 finish()
             } else {
                 memoTitleContainer.error = getErrorMessage(model.hasTitleError(), R.string.memo_title_empty_error)
-                memoDescription.error = getErrorMessage(model.hasTextError(), R.string.memo_text_empty_error)
+                memoDescriptionContainer.error = getErrorMessage(model.hasTextError(), R.string.memo_text_empty_error)
                 if (model.hasLocationError()) {
                     val errorColor = ContextCompat.getColor(this@CreateMemo, com.google.android.material.R.color.design_error)
                     locationCard.strokeColor = errorColor

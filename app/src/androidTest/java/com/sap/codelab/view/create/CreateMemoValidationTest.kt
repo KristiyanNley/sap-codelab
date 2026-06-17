@@ -1,5 +1,6 @@
 package com.sap.codelab.view.create
 
+import android.Manifest
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
@@ -10,6 +11,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
 import com.sap.codelab.R
 import org.junit.Rule
 import org.junit.Test
@@ -18,7 +20,13 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class CreateMemoValidationTest {
 
-    @get:Rule
+    @get:Rule(order = 0)
+    val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    )
+
+    @get:Rule(order = 1)
     val activityRule = ActivityScenarioRule(CreateMemo::class.java)
 
     @Test
